@@ -1,0 +1,22 @@
+use("hamburgueseria")
+db.ingredientes.aggregate([
+    {
+      $lookup: {
+        from: "hamburguesas",
+        localField: "nombre",
+        foreignField: "ingredientes",
+        as: "hamburguesas_ingrediente",
+      }
+    },
+    {
+      $match: {
+        hamburguesas_ingrediente: { $size: 0 }
+      }
+    },
+    {
+        $project: {
+            "_id": 0,
+            "nombre": 1
+        }
+    }
+  ])

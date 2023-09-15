@@ -317,7 +317,7 @@ router.get('/endpoint20', async(req,res)=>{
         await client.connect();
         const db = client.db(nombreBase)
         const collection = db.collection("hamburguesas");
-        const result = await collection.find().sort({ precio: 1 }).toArray();
+        const result = await collection.find().sort({ precio: -1 }).toArray();
         res.json(result);
         client.close();
     } catch (error) {
@@ -452,7 +452,7 @@ router.post('/endpoint28', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.delete('/endpoin29', async(req,res)=>{
+router.delete('/endpoint29', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -468,7 +468,7 @@ router.delete('/endpoin29', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin30', async(req,res)=>{
+router.get('/endpoint30', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -484,7 +484,7 @@ router.get('/endpoin30', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin31', async(req,res)=>{
+router.get('/endpoint31', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -500,7 +500,7 @@ router.get('/endpoin31', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin32', async(req,res)=>{
+router.get('/endpoint32', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -528,7 +528,7 @@ router.get('/endpoin32', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin33', async(req,res)=>{
+router.get('/endpoint33', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -537,16 +537,10 @@ router.get('/endpoin33', async(req,res)=>{
         const result = await collection.aggregate([
             {
                 $group: {
-                    _id: "$chefC",
-                    numHamburguesas: { $sum: 1 }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    chef: "$_id",
-                    numHamburguesas: 1
-                }
+                    _id: "$chef",
+                    Hamburguesas: { $max: {nombre:"$nombre",numHamburguesas: {$sum:1}
+                }} }
+                    
             }
         ]).toArray();
         res.json(result);
@@ -557,7 +551,7 @@ router.get('/endpoin33', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin34', async(req,res)=>{
+router.get('/endpoint34', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -589,7 +583,7 @@ router.get('/endpoin34', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin35', async(req,res)=>{
+router.get('/endpoint35', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -598,18 +592,18 @@ router.get('/endpoin35', async(req,res)=>{
         const result = await collection.aggregate([
             {
               $lookup: {
-                from: "Chefs",
+                from: "chefs",
                 localField: "chef",
                 foreignField: "nombre",
-                as: "xdxd",
+                as: "xdxdxd",
               },
             },
             {
               $lookup: {
-                from: "Ingredientes",
+                from: "ingredientes",
                 localField: "ingredientes",
                 foreignField: "nombre",
-                as: "xdxd",
+                as: "xdxdxdxd",
               },
             },
             {
@@ -633,25 +627,25 @@ router.get('/endpoin35', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin36', async(req,res)=>{
+router.get('/endpoint36', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
         const db = client.db(nombreBase)
-        const collection = db.collection("hamburguesas");
+        const collection = db.collection("ingredientes");
         const result = await collection.aggregate([
             {
               $lookup: {
-                from: "Hamburguesas",
+                from: "hamburguesas",
                 localField: "nombre",
                 foreignField: "ingredientes",
-                as: "hamburguesas_con_estos_ingredientes",
-              },
+                as: "hamburguesas_ingrediente",
+              }
             },
             {
               $match: {
-                hamburguesas_con_este_ingrediente: { $size: 0 },
-              },
+                hamburguesas_ingrediente: { $size: 0 }
+              }
             },
             {
                 $project: {
@@ -660,44 +654,41 @@ router.get('/endpoin36', async(req,res)=>{
                 }
             }
           ]).toArray();
-        res.json(result);
+        res.json({msg:"xd",result});
         client.close();
     } catch (error) {
         
         res.status(404);
         res.send({error: "no se pudo hacer la consulta"});
+        console.log(error);
     }
 });
-router.get('/endpoin37', async(req,res)=>{
+router.get('/endpoint37', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
         const db = client.db(nombreBase)
         const collection = db.collection("hamburguesas");
         const result = await collection.aggregate([
+
             {
-                $lookup: {
-                  from: "Categorias",
-                  localField: "categoria",
-                  foreignField: "nombre",
-                  as: "xd"
+                $lookup:{
+                    from:"categorias",
+                    localField: "categoria",
+                    foreignField: "nombre",
+                    as: "descripcion_categoria"
                 }
             },
             {
-                $unwind: "$xd"
-            },
+                $unwind: "$descripcion_categoria"
+            },         
             {
-                $project: {
-                  "xd._id": 0,
-                  "xd.nombre": 0,
-                  "_id": 0,
-                  "ingredientes": 0,
-                  "chef": 0,
-                  "__v": 0,
-                  "precio": 0,
-                  "nombre": 0
+                $group: {
+                    _id: "$nombre",
+                    hamburguesa: { $min: {nombre:"$nombre",categoria:"$categoria", descripcion: "$descripcion_categoria.descripcion"}  }
                 }
             }
+
         ]).toArray();   
         res.json(result);
         client.close();
@@ -707,7 +698,7 @@ router.get('/endpoin37', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin38', async(req,res)=>{
+router.get('/endpoint38', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -728,13 +719,6 @@ router.get('/endpoin38', async(req,res)=>{
             },
             {
                 $limit: 1
-            },
-            {
-                $project: {
-                    _id: 0,
-                    chef: "$_id",
-                    totalIngredientes: 1
-                }
             }
         ]).toArray();   
         res.json(result);
@@ -745,7 +729,7 @@ router.get('/endpoin38', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin39', async(req,res)=>{
+router.get('/endpoint39', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -757,13 +741,6 @@ router.get('/endpoin39', async(req,res)=>{
                     _id: "$categoria",
                     precioPromedio: { $avg: "$precio" }
                 }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    categoria: "$_id",
-                    precioPromedio: 1
-                }
             }
         ]).toArray();
         res.json(result);
@@ -774,7 +751,7 @@ router.get('/endpoin39', async(req,res)=>{
         res.send({error: "no se pudo hacer la consulta"});
     }
 });
-router.get('/endpoin40', async(req,res)=>{
+router.get('/endpoint40', async(req,res)=>{
     try {
         const client = new MongoClient(base);
         await client.connect();
@@ -787,13 +764,6 @@ router.get('/endpoin40', async(req,res)=>{
                     hamburguesaMasCara: { $max: { nombre: "$nombre", precio: "$precio" } } 
                 }
             },
-            {
-                $project: {
-                    _id: 0,
-                    chef: "$_id",
-                    hamburguesaMasCara: 1
-                }
-            }
         ]).toArray();
         res.json(result);
         client.close();
